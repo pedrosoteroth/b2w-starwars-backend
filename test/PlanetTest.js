@@ -1,75 +1,74 @@
-const chai = require('chai');
-const sinon = require('sinon');
 const req = require('supertest');
-const expect = chai.expect;
-const query = require('querystring');
 
-const url = 'http://localhost:8080/planetas';
+const url = 'http://localhost:8081';
 
 const cTimeout = 60000;
 
 describe('Routes', () => {
-    var Planet = {};
-    it('create', (done) => {
-        req(url).post('')
-        .send({
-            name: 'Planeta Teste',
-            terrain: 'Terreno Teste',
-            climate: 'Clima Teste'
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-            if(!('success' in res.body)) throw new Error('Faltando resposta padrão de sucesso');
-            if(!('data' in res.body) && res.body.success == true) throw new Error('Faltando resposta padrao para dados');
-            Planet = res.body.data;
-            done();
-        })
-    }).timeout(cTimeout)
+    const hasBody = (res) => {
+        if (!res.body) throw new Error('faltando corpo da resposta');
+    };
+
+    let id;
+
+    it('add fail', (done) => {
+        req(url).post('/planetas')
+            .send({
+                name: 'Planeta Teste',
+                terrain: 'Terreno Teste',
+                climate: 'Clima Teste'
+            })
+            .expect('Content-Type', 'text/html; charset=utf-8')
+            .expect(404)
+            .expect(hasBody)
+            .end(done);
+    }).timeout(cTimeout);
+
+    it('add success', (done) => {
+        req(url).post('/planetas')
+            .send({
+                name: 'Endor',
+                terrain: 'forests, mountains, lakes',
+                climate: 'temperate'
+            })
+            .expect('Content-Type', /json/)
+            .expect(({
+                body
+            }) => {
+                id = body.id;
+            })
+            .expect(200)
+            .expect(hasBody)
+            .end(done);
+    }).timeout(cTimeout);
 
     it('list', (done) => {
-        req(url).get('')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .expect((res) => {
-            if(!('success' in res.body)) throw new Error('Faltando resposta padrão de sucesso');
-            if(!('data' in res.body)) throw new Error('Faltando resposta padrao para dados');
-        }).end(done)
-    })
-    it('retrieveById', (done) => {
-        req(url).get('/' + Planet._id)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .expect((res) => {
-            if(!('success' in res.body)) throw new Error('Faltando resposta padrão de sucesso');
-            if(!('data' in res.body)) throw new Error('Faltando resposta padrao para dados');
+        req(url).get('/planetas')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .expect(hasBody)
+            .end(done);
+    });
 
-            if(res.body.data.name !== 'Planeta Teste') throw new Error('Nome incorreto');
-            if(res.body.data.terrain !== 'Terreno Teste') throw new Error('Terreno está Incorreto');
-            if(res.body.data.climate !== 'Clima Teste') throw new Error('Clima está Incorreto');
-            if(res.body.data.apparitions !== 0) throw new Error('Número de aparições incorretas');
-        }).end(done)
-    })
-    it('retrieveByName', (done) => {
-        req(url).get('/?' + query.stringify({name: Planet.name}))
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .expect((res) => {
-            if(!('success' in res.body)) throw new Error('Faltando resposta padrão de sucesso');
-            if(!('data' in res.body)) throw new Error('Faltando resposta padrao para dados');
+    it('list by name', (done) => {
+        req(url).get('/planetas?name=Endor')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .expect(hasBody)
+            .end(done);
+    });
 
-            if(res.body.data[0].name !== 'Planeta Teste') throw new Error('Nome incorreto');
-            if(res.body.data[0].terrain !== 'Terreno Teste') throw new Error('Terreno está Incorreto');
-            if(res.body.data[0].climate !== 'Clima Teste') throw new Error('Clima está Incorreto');
-            if(res.body.data[0].apparitions !== 0) throw new Error('Número de aparições incorretas');
-        }).end(done)
-    })
+    it('find by id', (done) => {
+        req(url).get('/planetas/5c1296f1600d5a2a6dfb5c44')
+            .expect('Content-Type', 'text/html; charset=utf-8')
+            .expect(200)
+            .expect(hasBody)
+            .end(done);
+    });
 
     it('delete', (done) => {
-        req(url).delete('/' + Planet._id)
-        .expect(200)
-        .expect((res) => {
-            if(!('success' in res.body)) throw new Error('Faltando resposta padrão de sucesso');
-        }).end(done)
-    })
+        req(url).delete(`/planetas/${id}`)
+            .expect(200)
+            .end(done);
+    });
 });

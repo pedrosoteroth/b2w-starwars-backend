@@ -54,7 +54,8 @@ const add = async (req, res) => {
         const result = await getPlanet(name);
         if (result.results[0]) {
             const {
-                lastErrorObject
+                lastErrorObject,
+                value
             } = await Planet.findOneAndUpdate({
                 name
             }, {
@@ -68,8 +69,12 @@ const add = async (req, res) => {
                 rawResult: true
             });
             res.status(200);
-            if (lastErrorObject && !lastErrorObject.updatedExisting) res.send(`Are you a god ? you just created ${name} from nothing`);
-            else res.send(`Another Jedi created ${name} already`);
+            if (lastErrorObject && !lastErrorObject.updatedExisting) {
+                res.send({
+                    message: `Are you a god ? you just created ${name} from nothing`,
+                    id: value.id
+                });
+            } else res.send(`Another Jedi created ${name} already`);
         } else {
             res.status(404);
             res.send(`
