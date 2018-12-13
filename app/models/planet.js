@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const conn = mongoose.createConnection('mongodb://192.168.99.100:27017/b2wstarwars');
+const conn = mongoose.createConnection(`mongodb://${process.env.MONGODB}`);
 
 const planetSchema = new mongoose.Schema({
     name: String,
