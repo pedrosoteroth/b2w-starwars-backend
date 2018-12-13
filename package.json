@@ -1,5 +1,5 @@
 {
-  "name": "b2w-desafio-nodejs",
+  "name": "b2w-starwars-backend",
   "version": "1.0.0",
   "description": "Desafio Backend NodeJS + MongoDB para a B2W Digital",
   "main": "index.js",
@@ -8,7 +8,7 @@
     "test": "node ./node_modules/mocha/bin/mocha"
   },
   "private": true,
-  "author": "Fabio Vieira",
+  "author": "Pedro Sotero",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.2",
